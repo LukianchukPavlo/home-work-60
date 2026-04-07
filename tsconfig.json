@@ -7,8 +7,8 @@
 
     // Environment Settings
     // See also https://aka.ms/tsconfig/module
-    "module": "commonjs",
-    "target": "esnext",
+    "target": "ES2020",
+    "module": "CommonJS",
     // "types": [],
     // For nodejs:
     // "lib": ["esnext"],
@@ -21,7 +21,7 @@
     "declarationMap": true,
     "resolveJsonModule": true,
     "esModuleInterop": true,
-
+    "forceConsistentCasingInFileNames": true,
 
     // Stricter Typechecking Options
     "noUncheckedIndexedAccess": true,
@@ -43,5 +43,6 @@
     "noUncheckedSideEffectImports": true,
     "moduleDetection": "force",
     "skipLibCheck": true,
-  }
+  },
+  "include": ["src/**/*"]
 }
