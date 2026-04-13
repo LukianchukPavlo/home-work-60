@@ -1,82 +1,107 @@
-import { Router, type Request, type Response, type NextFunction } from 'express';
+import { Router, type Response, type NextFunction } from 'express';
+import { IExtendedRequest } from './interfaces/request';
+import { validateBody } from './middlewares/validate.middleware';
+import { taskAccessMiddleware } from './middlewares/task.middleware';
 
 const router = Router();
 
 const user = {
-  id: '37d42238-a84d-47c4-8030-e3d0e91d43de',
-  email: 'alex@gmail.com'
+  id: '37d42238-a84d-47c4-8030-e3d0e91d43de'
 };
 
 const TASKS = [
   { id: '1', title: 'Task 1', description: 'First task', boardId: '1', authorId: user.id },
   { id: '2', title: 'Task 2', description: 'Second task', boardId: '1', authorId: user.id },
-  { id: '3', title: 'Task 3', description: 'Third task', boardId: '2', authorId: user.id },
+  { id: '3', title: 'Task 3', description: 'Third task', boardId: '2', authorId: user.id }
 ];
 
-router.get('/', (req: Request, res: Response, next: NextFunction) => {
+router.get('/', (req: IExtendedRequest, res: Response, next: NextFunction) => {
   const { boardId } = req.query;
 
   if (!boardId) {
-    return res.status(422).json({ message: "You need to specify board ID" });
+    req.log?.warn('Missing boardId');
+
+    return res.status(422).json({
+      message: 'boardId is required'
+    });
   }
 
-  const filteredTasks = TASKS.filter(
-    task => task.boardId === boardId && task.authorId === user.id
+  const result = TASKS.filter(
+    t => t.boardId === boardId && t.authorId === user.id
   );
 
-  return res.status(200).json(filteredTasks);
+  req.log?.info('Get tasks by boardId');
+
+  return res.json(result);
 });
 
-router.get('/:taskId', (req: Request, res: Response, next: NextFunction) => {
-  const { taskId } = req.params;
-  const task = TASKS.find(task => task.id === taskId);
-
-  if (!task) return res.status(404).json({ message: 'Task not found' });
-
-  return res.status(200).json(task);
-});
-
-router.post('/', (req: Request, res: Response, next: NextFunction) => {
-  const { title, description, boardId } = req.body;
-
-  if (!title || !boardId) {
-    return res.status(400).json({ message: 'Title and boardId are required' });
+router.get(
+  '/:taskId',
+  taskAccessMiddleware,
+  (req: IExtendedRequest, res: Response, next: NextFunction) => {
+    req.log?.info('Get task by id');
+    return res.json(req.task);
   }
+);
 
-  const newTask = {
-    id: (TASKS.length + 1).toString(),
-    title,
-    description: description || '',
-    boardId,
-    authorId: user.id
-  };
+router.post(
+  '/',
+  validateBody({ title: 'string', boardId: 'string' }),
+  (req: IExtendedRequest, res: Response, next: NextFunction) => {
+    const { title, description, boardId } = req.body;
 
-  TASKS.push(newTask);
-  return res.status(201).json(newTask);
-});
+    if (!title || !boardId) {
+      req.log?.warn('Missing task fields');
 
-router.put('/:taskId', (req: Request, res: Response, next: NextFunction) => {
-  const { taskId } = req.params;
-  const { title, description } = req.body;
+      return res.status(400).json({
+        message: 'Title and boardId are required'
+      });
+    }
 
-  const task = TASKS.find(task => task.id === taskId);
-  if (!task) return res.status(404).json({ message: 'Task not found' });
+    const newTask = {
+      id: (TASKS.length + 1).toString(),
+      title,
+      description: description || '',
+      boardId,
+      authorId: user.id
+    };
 
-  if (title) task.title = title;
-  if (description) task.description = description;
+    TASKS.push(newTask);
 
-  return res.status(200).json(task);
-});
+    req.log?.info('Task created');
 
+    return res.status(201).json(newTask);
+  }
+);
 
-router.delete('/:taskId', (req: Request, res: Response, next: NextFunction) => {
-  const { taskId } = req.params;
-  const index = TASKS.findIndex(task => task.id === taskId);
+router.put(
+  '/:taskId',
+  taskAccessMiddleware,
+  (req: IExtendedRequest, res: Response, next: NextFunction) => {
+    const { title, description } = req.body;
 
-  if (index === -1) return res.status(404).json({ message: 'Task not found' });
+    if (title) req.task.title = title;
+    if (description) req.task.description = description;
 
-  TASKS.splice(index, 1);
-  return res.status(200).json({ message: 'Task deleted' });
-});
+    req.log?.info('Task updated');
+
+    return res.json(req.task);
+  }
+);
+
+router.delete(
+  '/:taskId',
+  taskAccessMiddleware,
+  (req: IExtendedRequest, res: Response, next: NextFunction) => {
+    const { taskId } = req.params;
+
+    const index = TASKS.findIndex(t => t.id === taskId);
+    TASKS.splice(index, 1);
+
+    req.log?.info('Task deleted');
+
+    return res.json({ message: 'Task deleted' });
+  }
+);
 
 export default router;

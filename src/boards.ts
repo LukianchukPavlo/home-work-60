@@ -1,8 +1,12 @@
-import {Router, type Request, type Response, type NextFunction } from 'express';
+import { Router, type Response, type NextFunction } from 'express';
+import { IExtendedRequest } from './interfaces/request';
+import { validateBody } from './middlewares/validate.middleware';
+import { boardAccessMiddleware } from './middlewares/board.middleware';
+
+const router = Router();
 
 const user = {
-  id: '37d42238-a84d-47c4-8030-e3d0e91d43de',
-  email: 'alex@gmail.com'
+  id: '37d42238-a84d-47c4-8030-e3d0e91d43de'
 };
 
 const BOARDS = [
@@ -11,60 +15,77 @@ const BOARDS = [
   { id: '3', name: 'Board 3', description: 'Third board', authorId: user.id }
 ];
 
-const router = Router();
-
-router.get('/', (req: Request, res: Response, next: NextFunction) => {
-  res.status(200).json(BOARDS);
+router.get('/', (req: IExtendedRequest, res: Response, next: NextFunction) => {
+  req.log?.info('Get all boards');
+  return res.json(BOARDS);
 });
 
-router.get('/:boardId', (req: Request, res: Response, next: NextFunction) => {
-  const { boardId } = req.params;
-  const board = BOARDS.find(board => board.id === boardId);
-
-  if (!board) {
-    return res.status(404).json({ message: 'Board not found' });
+router.get(
+  '/:boardId',
+  boardAccessMiddleware,
+  (req: IExtendedRequest, res: Response, next: NextFunction) => {
+    req.log?.info('Get board by id');
+    return res.json(req.board);
   }
+);
 
-  return res.status(200).json(board);
-});
+router.post(
+  '/',
+  validateBody({ name: 'string' }),
+  (req: IExtendedRequest, res: Response, next: NextFunction) => {
+    const { name, description } = req.body;
 
-router.post('/', (req: Request, res: Response, next: NextFunction) => {
-  const { name, description } = req.body;
+    if (!name) {
+      req.log?.warn('Missing board name');
 
-  if (!name) return res.status(400).json({ message: 'Name is required' });
+      return res.status(400).json({
+        message: 'Name is required'
+      });
+    }
 
-  const newBoard = {
-    id: (BOARDS.length + 1).toString(),
-    name,
-    description: description || '',
-    authorId: user.id
-  };
+    const newBoard = {
+      id: (BOARDS.length + 1).toString(),
+      name,
+      description: description || '',
+      authorId: user.id
+    };
 
-  BOARDS.push(newBoard);
-  return res.status(201).json(newBoard);
-});
+    BOARDS.push(newBoard);
 
-router.delete('/:boardId', (req: Request, res: Response, next: NextFunction) => {
-  const { boardId } = req.params;
-  const index = BOARDS.findIndex(board => board.id === boardId);
+    req.log?.info('Board created');
 
-  if (index === -1) return res.status(404).json({ message: 'Board not found' });
+    return res.status(201).json(newBoard);
+  }
+);
 
-  BOARDS.splice(index, 1);
-  return res.status(200).json({ message: 'Board deleted' });
-});
+router.put(
+  '/:boardId',
+  boardAccessMiddleware,
+  (req: IExtendedRequest, res: Response, next: NextFunction) => {
+    const { name, description } = req.body;
 
-router.put('/:boardId', (req: Request, res: Response, next: NextFunction) => {
-  const { boardId } = req.params;
-  const { name, description } = req.body;
+    if (name) req.board.name = name;
+    if (description) req.board.description = description;
 
-  const board = BOARDS.find(board => board.id === boardId);
-  if (!board) return res.status(404).json({ message: 'Board not found' });
+    req.log?.info('Board updated');
 
-  if (name) board.name = name;
-  if (description) board.description = description;
+    return res.json(req.board);
+  }
+);
 
-  return res.status(200).json(board);
-});
+router.delete(
+  '/:boardId',
+  boardAccessMiddleware,
+  (req: IExtendedRequest, res: Response, next: NextFunction) => {
+    const { boardId } = req.params;
 
-export default router
+    const index = BOARDS.findIndex(b => b.id === boardId);
+    BOARDS.splice(index, 1);
+
+    req.log?.info('Board deleted');
+
+    return res.json({ message: 'Board deleted' });
+  }
+);
+
+export default router;
