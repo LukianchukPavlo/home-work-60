@@ -6,7 +6,8 @@ const router = Router();
 
 const user = {
   id: '37d42238-a84d-47c4-8030-e3d0e91d43de',
-  email: 'alex@gmail.com'
+  email: 'alex@gmail.com',
+  password: 'alex-12345'
 };
 
 router.get('/', (req: IExtendedRequest, res: Response, next: NextFunction) => {
@@ -46,13 +47,13 @@ router.post(
   (req: IExtendedRequest, res: Response, next: NextFunction) => {
     const { email, password } = req.body;
 
-    if (!email || !password) {
-      req.log?.warn('Missing credentials');
+    if (email !== user.email || password !== user.password) {
+  req.log?.warn('Invalid credentials');
 
-      return res.status(400).json({
-        message: 'Email and password are required'
-      });
-    }
+  return res.status(401).json({
+    message: 'Invalid credentials'
+  });
+}
 
     if (email !== user.email) {
       req.log?.warn('Invalid credentials');
