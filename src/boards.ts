@@ -24,6 +24,15 @@ router.get(
   '/:boardId',
   boardAccessMiddleware,
   (req: IExtendedRequest, res: Response, next: NextFunction) => {
+    if (!req.board) {
+      req.log?.warn('Board not found');
+
+      return next({
+        status: 404,
+        message: 'Board not found'
+      });
+    }
+    
     req.log?.info('Get board by id');
     return res.json(req.board);
   }
@@ -62,6 +71,15 @@ router.put(
   '/:boardId',
   boardAccessMiddleware,
   (req: IExtendedRequest, res: Response, next: NextFunction) => {
+    if (!req.board) {
+      req.log?.warn('Board not found for update');
+
+      return next({
+        status: 404,
+        message: 'Board not found'
+      });
+    }
+    
     const { name, description } = req.body;
 
     if (name) req.board.name = name;
@@ -79,7 +97,16 @@ router.delete(
   (req: IExtendedRequest, res: Response, next: NextFunction) => {
     const { boardId } = req.params;
 
-    const index = BOARDS.findIndex(b => b.id === boardId);
+    const index = BOARDS.findIndex(board => board.id === boardId);
+    if (index === -1) {
+      req.log?.warn('Board not found for delete');
+
+      return next({
+        status: 404,
+        message: 'Board not found'
+      });
+    }
+    
     BOARDS.splice(index, 1);
 
     req.log?.info('Board deleted');

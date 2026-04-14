@@ -27,7 +27,7 @@ router.get('/', (req: IExtendedRequest, res: Response, next: NextFunction) => {
   }
 
   const result = TASKS.filter(
-    t => t.boardId === boardId && t.authorId === user.id
+    task => task.boardId === boardId && task.authorId === user.id
   );
 
   req.log?.info('Get tasks by boardId');
@@ -39,6 +39,15 @@ router.get(
   '/:taskId',
   taskAccessMiddleware,
   (req: IExtendedRequest, res: Response, next: NextFunction) => {
+    if (!req.task) {
+      req.log?.warn('Task not found');
+
+      return next({
+        status: 404,
+        message: 'Task not found'
+      });
+    }
+    
     req.log?.info('Get task by id');
     return res.json(req.task);
   }
@@ -78,6 +87,15 @@ router.put(
   '/:taskId',
   taskAccessMiddleware,
   (req: IExtendedRequest, res: Response, next: NextFunction) => {
+    if (!req.task) {
+      req.log?.warn('Task not found for update');
+
+      return next({
+        status: 404,
+        message: 'Task not found'
+      });
+    }
+    
     const { title, description } = req.body;
 
     if (title) req.task.title = title;
@@ -95,7 +113,16 @@ router.delete(
   (req: IExtendedRequest, res: Response, next: NextFunction) => {
     const { taskId } = req.params;
 
-    const index = TASKS.findIndex(t => t.id === taskId);
+    const index = TASKS.findIndex(task => task.id === taskId);
+    if (index === -1) {
+      req.log?.warn('Task not found for delete');
+
+      return next({
+        status: 404,
+        message: 'Task not found'
+      });
+    }
+    
     TASKS.splice(index, 1);
 
     req.log?.info('Task deleted');
