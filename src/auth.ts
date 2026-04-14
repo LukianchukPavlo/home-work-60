@@ -50,19 +50,10 @@ router.post(
     if (email !== user.email || password !== user.password) {
   req.log?.warn('Invalid credentials');
 
-  return res.status(401).json({
-    message: 'Invalid credentials'
-  });
-}
-
-    if (email !== user.email) {
-      req.log?.warn('Invalid credentials');
-
-      return res.status(401).json({
-        message: 'Invalid credentials'
-      });
-    }
-
+    return res.status(401).json({
+      message: 'Invalid credentials'
+    });
+  }
     req.log?.info('User signed in');
 
     return res.status(200).json({
