@@ -1,7 +1,7 @@
 import { Router, type Response, type NextFunction } from 'express';
-import { IExtendedRequest } from './interfaces/request';
-import { validateBody } from './middlewares/validate.middleware';
-import { boardAccessMiddleware } from './middlewares/board.middleware';
+import { IExtendedRequest } from '../../../../interfaces/request';
+import { validateBody } from '../../../../middlewares/validate.middleware';
+import { boardAccessMiddleware } from '../../../../middlewares/board.middleware';
 
 const router = Router();
 

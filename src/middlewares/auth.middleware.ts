@@ -1,17 +1,27 @@
-import { Response, NextFunction } from 'express';
-import { IExtendedRequest } from '../interfaces/request';
+import { type Response, type NextFunction } from 'express';
+import jwt from "jsonwebtoken";
+import { UnauthorizedError } from '../common/errors';
 
-export function authMiddleware(req: IExtendedRequest, res: Response, next: NextFunction) {
-  const authHeader = req.headers['authorization'];
+import type { IExtendedRequest, IUser } from '../interfaces';
 
-  if (!authHeader) {
-    req.log?.warn('Unauthorized request');
-    return res.status(401).json({ message: 'Unauthorized' });
+export const authValidation = (req: IExtendedRequest, res: Response, next: NextFunction) => {
+  const token = req.session?.jwt;
+
+  if (!token) {
+    return next(new UnauthorizedError('No authentication token provided'));
   }
 
-  req.user = {
-    id: '37d42238-a84d-47c4-8030-e3d0e91d43de'
-  };
+  try {
+    const payload = jwt.verify(
+      token, 
+      process.env.JWT_SECRET_KEY!
+    ) as { user: Pick<IUser, 'id'> };
+
+    req.user = payload.user;
+  }
+  catch {
+    return next(new UnauthorizedError('Invalid authentication token'));
+  }
 
   next();
-}
+};

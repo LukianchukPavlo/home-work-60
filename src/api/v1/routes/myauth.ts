@@ -1,6 +1,6 @@
 import { Router, type Response, type NextFunction } from 'express';
-import { IExtendedRequest } from './interfaces/request';
-import { validateBody } from './middlewares/validate.middleware';
+import { IExtendedRequest } from '../../../interfaces/request';
+import { validateBody } from '../../../middlewares/validate.middleware';
 
 const router = Router();
 
@@ -44,16 +44,18 @@ router.post(
 router.post(
   '/sign-in',
   validateBody({ email: 'string', password: 'string' }),
-  (req: IExtendedRequest, res: Response, next: NextFunction) => {
-    const { email, password } = req.body;
+  (req: IExtendedRequest, res: Response) => {
+    const email = String(req.body.email).trim();
+    const password = String(req.body.password).trim();
 
     if (email !== user.email || password !== user.password) {
-  req.log?.warn('Invalid credentials');
+      req.log?.warn('Invalid credentials');
 
-    return res.status(401).json({
-      message: 'Invalid credentials'
-    });
-  }
+      return res.status(401).json({
+        message: 'Invalid credentials'
+      });
+    }
+
     req.log?.info('User signed in');
 
     return res.status(200).json({

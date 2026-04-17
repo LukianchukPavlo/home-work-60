@@ -1,11 +1,11 @@
 import express from "express";
 import path from "node:path";
 
-import authRoutes from './auth';
-import boardsRoutes from './boards';
-import tasksRoutes from './tasks';
+import authRoutes from './api/v1/controllers/routes/auth';
+import boardsRoutes from './api/v1/controllers/routes/boards';
+import tasksRoutes from './api/v1/controllers/routes/tasks';
 
-import { initLogger, getLogger } from './utils/logger';
+import { initLogger, getLogger } from './modules/logger';
 import { loggerMiddleware } from './middlewares/logger.middleware';
 import { authMiddleware } from './middlewares/auth.middleware';
 import { errorMiddleware } from './middlewares/error.middleware';
