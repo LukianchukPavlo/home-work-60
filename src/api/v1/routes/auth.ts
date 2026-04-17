@@ -4,6 +4,7 @@ import { body } from 'express-validator';
 import { AuthRepository } from '../../../repositories/json-db';
 import { AuthService } from '../../../services';
 import { AuthController } from '../controllers/auth';
+import { validateRequest } from '../../../middlewares';
 
 
 export const createAuthRouter = (): Router => {
@@ -33,6 +34,7 @@ export const createAuthRouter = (): Router => {
         .isLength({ min: 6 })
         .withMessage('Password must be at least 6 characters long')
     ],
+    validateRequest,
     controller.signUp.bind(controller)
   );
 
@@ -52,6 +54,7 @@ export const createAuthRouter = (): Router => {
         .isLength({ min: 6 })
         .withMessage('Password must be at least 6 characters long')
     ],
+    validateRequest,
     controller.signIn.bind(controller)
   );
 

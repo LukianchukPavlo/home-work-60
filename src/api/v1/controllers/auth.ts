@@ -53,18 +53,20 @@ export class AuthController {
   }
 
   async signOut(req: IExtendedRequest, res: Response, next: NextFunction) {
-    try {
-      req.session = null;
-
+    this.authService
+    .signOut(req)
+    .then(() => {
       req.log?.info('User signed out');
 
       return res.status(StatusCodes.SUCCESS).json({
         data: { message: 'Sign out successful' },
         error: {}
       });
-    } catch (error) {
+    })
+    .catch(error => {
       req?.log?.error('Failed to sign out', { error });
       next(error);
-    }
+    });
   }
 }
+

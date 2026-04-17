@@ -1,5 +1,4 @@
 import crypto from "node:crypto";
-import { validationResult } from "express-validator";
 import jwt from "jsonwebtoken";
 
 import { Password } from "../modules/Password";
@@ -35,11 +34,6 @@ export class AuthService {
   }
 
   public async signUp(request: IExtendedRequest, { name, email, password }: Pick<IUser, 'name' | 'email' | 'password'>): Promise<UserDataReturn> {
-    const result = validationResult(request);
-
-    if (!result.isEmpty()) {
-      throw new ValidationError('Validation failed', result.array());
-    }
 
     const [existingUser] = await this.repository.findByQuery<IUser>({ email });
 
@@ -70,12 +64,7 @@ export class AuthService {
   }
 
   public async signIn(request: IExtendedRequest, { email, password }: Pick<IUser, 'email' | 'password'>): Promise<UserDataReturn> {
-    const result = validationResult(request);
-
-    if (!result.isEmpty()) {
-      throw new ValidationError('Validation failed', result.array());
-    }
-
+    
     const [existingUser] = await this.repository.findByQuery<IUser>({ email })
 
     if (!existingUser) {
@@ -96,5 +85,9 @@ export class AuthService {
       ...userData,
       token,
     };
+  }
+
+  public async signOut(request: IExtendedRequest): Promise<void> {
+    request.session = null;
   }
 }
