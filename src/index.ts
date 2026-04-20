@@ -1,36 +1,59 @@
-import express from "express";
-import path from "node:path";
+import path from 'node:path';
+import dotenv from 'dotenv';
+import { createApp } from './app';
+import { initLogger } from './modules/logger';
+import { connect } from './repositories/json-db/base';
 
-import authRoutes from './api/v1/controllers/routes/auth';
-import boardsRoutes from './api/v1/controllers/routes/boards';
-import tasksRoutes from './api/v1/controllers/routes/tasks';
+dotenv.config({ path: path.join(__dirname, '..', '.env') });
 
-import { initLogger, getLogger } from './modules/logger';
-import { loggerMiddleware } from './middlewares/logger.middleware';
-import { authMiddleware } from './middlewares/auth.middleware';
-import { errorMiddleware } from './middlewares/error.middleware';
+try {
+  const { PORT, DB_URI, DB_PORT, JWT_SECRET_KEY, COOKIE_SECRET_KEY, CLIENT_URLS } = process.env;
+  
+  if (!PORT) {
+    console.error('PORT is not defined in environment variables');
 
-const app = express();
+    throw new Error('PORT is not defined in environment variables');
+  }
 
-app.use(express.json());
+  if (!DB_URI || !DB_PORT) {
+    console.error('DB_URI or DB_PORT is not defined in environment variables');
 
-const logDir = path.join(process.cwd(), 'logs');
-initLogger(logDir);
+    throw new Error('DB_URI or DB_PORT is not defined in environment variables');
+  }
 
-const logger = getLogger();
+  if (!JWT_SECRET_KEY || !COOKIE_SECRET_KEY) {
+    console.error('JWT_SECRET_KEY or COOKIE_SECRET_KEY is not defined in environment variables');
 
-app.use(loggerMiddleware(logger));
+    throw new Error('JWT_SECRET_KEY or COOKIE_SECRET_KEY is not defined in environment variables');
+  }
 
-app.use('/api/v1/auth', authRoutes);
-app.use('/api/v1/boards', authMiddleware, boardsRoutes);
-app.use('/api/v1/tasks', authMiddleware, tasksRoutes);
+  if (!CLIENT_URLS) {
+    console.error('CLIENT_URLS is not defined in environment variables');
 
-app.use(errorMiddleware);
+    throw new Error('CLIENT_URLS is not defined in environment variables');
+  }
 
-const PORT = process.env.PORT || 3000;
+  connect(`${DB_URI}:${DB_PORT}`)
+    .then(() => {
 
-app.listen(PORT, () => {
-  logger.info(`Server running on port ${PORT}`);
-});
+      const logsPath = path.join(__dirname, 'logs');
+      const logger = initLogger(logsPath);
+      const app = createApp({ loggerInstance: logger });
 
-export { app };
+      logger.info('Connected to JSON Server database');
+
+      app.listen(PORT, () => {
+        logger.info(`Server is running on port ${PORT}`);
+      });
+    })
+    .catch((error) => {
+      console.error('Failed to connect to JSON Server database', { error });
+
+      throw new Error('Failed to connect to JSON Server database');
+    });
+
+} catch (error) {
+  console.error('Failed to start the application', { error });
+
+  process.exit(1);
+}

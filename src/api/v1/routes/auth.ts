@@ -13,6 +13,7 @@ export const createAuthRouter = (): Router => {
   const repository = new AuthRepository();
   const service = new AuthService({ repository });
   const controller = new AuthController({ authService: service});
+  
 
   router.post(
     '/sign-up',

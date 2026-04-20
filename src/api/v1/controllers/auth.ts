@@ -13,7 +13,7 @@ export class AuthController {
   constructor({ authService }: ConstructorParams) {
     this.authService = authService;
   }
-
+  
   async signUp(req: IExtendedRequest, res: Response, next: NextFunction) {
     const { name, email, password } = req.body;
 

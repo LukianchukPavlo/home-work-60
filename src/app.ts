@@ -1,6 +1,7 @@
 import path from 'node:path';
 import express, { type Application, type Response, type NextFunction } from 'express';
 import session from 'cookie-session';
+import cors from "cors"
 
 import { router as apiV1 } from './api/v1/routes';
 import { loggerMiddleware } from './middlewares/logger.middleware';
@@ -13,15 +14,26 @@ export const createApp = ({ loggerInstance }: IApp): Application => {
 
   const app = express();
 
+  const clientUrls = process.env!.CLIENT_URLS!.split(/\s*,\s*/);
+
+  const corsOptions = {
+    origin: clientUrls,
+    credentials: true,
+    methods: ["GET", "POST", "PUT", "DELETE","PATCH"],
+    optionsSuccessStatus: 200,
+  };
+  
+  app.use(cors(corsOptions));
+
   app.use('/static', express.static(staticPath));
   app.use(express.json());
   app.use(session({
       name: 'session',
-      keys: [process.env.COOKIE_SECRET_KEY!], // Ensure that COOKIE_SECRET_KEY is defined in your environment variables
-      maxAge: 24 * 60 * 60 * 1000, // 24 hours
+      keys: [process.env.COOKIE_SECRET_KEY!], 
+      maxAge: 24 * 60 * 60 * 1000, 
       httpOnly: true,
       secure: process.env.NODE_ENV === 'production',
-      sameSite: 'lax', // Consider using 'strict' or 'none' based on your requirements. List of options: https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Headers/Set-Cookie#samesitesamesite-value
+      sameSite: 'lax', 
   }));
   app.use(loggerMiddleware(loggerInstance));
 
