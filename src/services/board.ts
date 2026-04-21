@@ -1,30 +1,136 @@
-import { IRepository } from "../interfaces";
-import { IBoard, BoardDataUpdate } from "../interfaces/entities/board";
+import crypto from "node:crypto";
+import { validationResult } from "express-validator";
+import { transformWorkflow } from "../utils";
+import { ForbiddenError, NotFoundError, ValidationError } from "../common/errors";
 
+import type { IExtendedRequest, IRepository, ITask } from "../interfaces";
+import type { WorkflowCode } from '../interfaces/workflow'
+import type { IBoard, BoardDataUpdate, BoardDataCreate } from "../interfaces/entities/board";
+
+type ConstructorParams = {
+  boardRepository: IRepository;
+  taskRepository: IRepository;
+};
 export class BoardService {
-  private repository: IRepository;
+  private boardRepository: IRepository;
+  private taskRepository: IRepository;
+
+  constructor({ boardRepository, taskRepository }: ConstructorParams) {
+    this.boardRepository = boardRepository;
+    this.taskRepository = taskRepository;
+  }
+
+  public async getBoardTasks(request: IExtendedRequest) {
+    const { boardId } = request.params!;
+
+    const board = await this.boardRepository.findById<IBoard>(boardId as string);
+
+    if (board && board.authorId !== request.user!.id) {
+      throw new ForbiddenError('You do not have permission to access this board');
+    }
+
+    if (!board) {
+      throw new NotFoundError('Board not found');
+    }
+
+    const tasks = await this.taskRepository.findByQuery<ITask>({
+      authorId: request.user!.id,
+      boardId: boardId as string
+    });
+
+    if (!tasks.length) {
+      throw new NotFoundError('No tasks found');
+    }
+
+    return tasks.map(task => ({
+      ...task,
+      workflow: transformWorkflow(task.workflow as WorkflowCode),
+    }));
+  }
+
+  public async getAllBoards(request: IExtendedRequest) {
+    const boards = await this.boardRepository.findByQuery<IBoard>({ authorId: request.user!.id });
+
+    if (!boards.length) {
+      throw new NotFoundError('No boards found');
+    }
   
-  constructor(repository: IRepository) {
-    this.repository = repository;
+    return boards;
   }
 
-  public async getAllBoards() {
-    return this.repository.findAll<IBoard>();
+  public async getBoardById(
+    request: IExtendedRequest,
+    { id }: { id: string }
+  ) {
+    const board = await this.boardRepository.findById<IBoard>(id);
+
+    if (board && board.authorId !== request.user!.id) {
+      throw new ForbiddenError('You do not have permission to access this board');
+    }
+
+    if (!board) {
+      throw new NotFoundError('Board not found');
+    }
+
+    return board;
   }
 
-  public async getBoardById(id: string) {
-    return this.repository.findById<IBoard>(id);
+  public async createBoard(
+    request: IExtendedRequest,
+    { boardData }: { boardData: BoardDataCreate }
+  ) {
+    const result = validationResult(request);
+    
+    if (!result.isEmpty()) {
+      throw new ValidationError('Validation failed', result.array());
+    }
+
+    const payload = {
+      ...boardData,
+      id: crypto.randomUUID(),
+      authorId: request.user!.id,
+    };
+
+    const newBoard = await this.boardRepository.create<IBoard, BoardDataCreate>(payload);
+
+    return newBoard;
   }
 
-  public async createBoard(boardData: IBoard) {
-    return this.repository.create<IBoard, IBoard>(boardData);
+  public async updateBoard(
+    request: IExtendedRequest,
+    { id, boardData }: { id: string, boardData: BoardDataUpdate }
+  ) {
+    const board = await this.boardRepository.findById<IBoard>(id);
+
+    if (board && board.authorId !== request.user!.id) {
+      throw new ForbiddenError('You do not have permission to update this board');
+    }
+
+    const result = validationResult(request);
+
+    if (!result.isEmpty()) {
+      throw new ValidationError('Validation failed', result.array());
+    }
+
+    const updatedBoard = await this.boardRepository.update<BoardDataUpdate, BoardDataUpdate>(id, boardData);
+
+    if (!updatedBoard) {
+      throw new NotFoundError('Board not found');
+    }
+
+    return updatedBoard;
   }
 
-  public async updateBoard(id: string, boardData: BoardDataUpdate) {
-    return this.repository.update<BoardDataUpdate, IBoard | null>(id, boardData);
-  }
+  public async deleteBoard(request: IExtendedRequest, { id }: { id: string }) {
+    const board = await this.boardRepository.findById<IBoard>(id);
 
-  public async deleteBoard(id: string) {
-    return this.repository.delete(id);
+    if (board && board.authorId !== request.user!.id) {
+      throw new ForbiddenError('You do not have permission to delete this board');
+    }
+
+    await this.boardRepository.delete(id);
+
+    return null;
   }
 }
+

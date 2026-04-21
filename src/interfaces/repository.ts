@@ -6,3 +6,7 @@ export interface IRepository {
   update<T, R>(id: string, data: T): Promise<R>;
   delete(id: string): Promise<void>;
 }
+
+export type ConstructorParams<R extends IRepository = IRepository> = {
+  repository: R;
+};

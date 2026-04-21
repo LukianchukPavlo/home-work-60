@@ -5,7 +5,7 @@ import { AuthRepository } from '../../../repositories/json-db';
 import { AuthService } from '../../../services';
 import { AuthController } from '../controllers/auth';
 import { validateRequest } from '../../../middlewares';
-
+import { authValidation } from '../../../middlewares';
 
 export const createAuthRouter = (): Router => {
   const router = Router();
@@ -14,6 +14,7 @@ export const createAuthRouter = (): Router => {
   const service = new AuthService({ repository });
   const controller = new AuthController({ authService: service});
   
+  router.get('/me', authValidation, controller.getMe.bind(controller));
 
   router.post(
     '/sign-up',

@@ -14,6 +14,19 @@ export class AuthController {
     this.authService = authService;
   }
   
+  public async getMe(req: IExtendedRequest, res: Response, next: NextFunction) {
+    return this.authService
+      .getMe(req)
+      .then(user => {
+        res.status(StatusCodes.SUCCESS).json({ data: user });
+      })
+      .catch(error => {
+        req?.log?.error(`Failed to fetch user data`, { error });
+
+        next(error);
+      });
+  }
+
   async signUp(req: IExtendedRequest, res: Response, next: NextFunction) {
     const { name, email, password } = req.body;
 

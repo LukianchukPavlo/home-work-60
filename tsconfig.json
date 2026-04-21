@@ -13,7 +13,10 @@
     // For nodejs:
     // "lib": ["esnext"],
     "types": ["node"],
-    // and npm install -D @types/node
+    "typeRoots": [
+      "./src/@types",
+      "node_modules/@types"
+    ],
 
     // Other Outputs
     "sourceMap": true,

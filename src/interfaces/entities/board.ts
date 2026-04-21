@@ -5,4 +5,5 @@ export interface IBoard {
   authorId: string;
 }
 
+export type BoardDataCreate = Omit<IBoard, 'id' | 'authorId'>;
 export type BoardDataUpdate = Partial<Omit<IBoard, 'id' | 'authorId'>>;
