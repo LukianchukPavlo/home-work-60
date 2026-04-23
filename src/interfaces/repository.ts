@@ -7,6 +7,11 @@ export interface IRepository {
   delete(id: string): Promise<void>;
 }
 
+
+export interface ITaskRepository extends IRepository {
+  updateTaskWorkflow<T, R>(id: string, data: T): Promise<R>;
+}
+
 export type ConstructorParams<R extends IRepository = IRepository> = {
   repository: R;
 };

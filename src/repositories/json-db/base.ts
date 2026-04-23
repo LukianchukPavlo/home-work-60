@@ -9,7 +9,7 @@ export abstract class JsonServerRepository implements IRepository {
     this.resource = resource;
   }
 
-  private get db() {
+  protected get db() {
     const client = getClient();
 
     if (!client) {

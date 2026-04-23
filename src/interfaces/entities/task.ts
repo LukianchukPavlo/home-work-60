@@ -1,10 +1,8 @@
-export type TaskWorkflow = 'todo' | 'in-progress' | 'done';
-
 export interface ITask {
   id: string;
   title: string;
   description: string;
-  workflow: TaskWorkflow;
+  workflow: string;
   boardId: string;
   authorId: string;
 }

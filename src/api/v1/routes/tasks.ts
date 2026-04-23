@@ -1,5 +1,5 @@
 import { Router } from 'express';
-import { query } from 'express-validator';
+import { body, query } from 'express-validator';
 
 import { BoardRepository, TaskRepository } from '../../../repositories/json-db';
 import { TaskService } from '../../../services';
@@ -21,7 +21,69 @@ export const createTaskRouter = (): Router => {
         .trim()
         .withMessage('boardId query parameter is required')
     ],
-    controller.getAllTasks.bind(controller));
+    controller.getAllTasks.bind(controller)
+    );
+
+    router.get(
+    '/:taskId',
+    controller.getTaskById.bind(controller)
+    );
+
+    router.post(
+    '/',
+    [
+      body('boardId')
+        .notEmpty()
+        .trim()
+        .withMessage('boardId is required'),
+      body('title')
+        .notEmpty()
+        .trim()
+        .withMessage('Title is required'),
+      body('description')
+        .optional()
+        .trim(),
+      body('workflow')
+        .optional()
+        .isIn(['todo', 'progress', 'done'])
+        .withMessage('Workflow must be one of: todo, progress, done'),
+    ],
+    controller.createTask.bind(controller)
+    );
+
+    router.put(
+    '/:taskId',
+    [
+      body('title')
+        .optional()
+        .trim(),
+      body('description')
+        .optional()
+        .trim(),
+    ],
+    controller.updateTask.bind(controller)
+    );
+
+    router.put(
+    '/:taskId/workflow',
+    [
+      body('workflow')
+        .notEmpty()
+        .isIn(['todo', 'progress', 'done'])
+        .withMessage('Workflow must be one of: todo, progress, done'),
+    ],
+    controller.updateTaskWorkflow.bind(controller)
+    );
+
+    router.delete(
+    '/:taskId',
+    controller.deleteTask.bind(controller)
+    );
+
+
+
+
+
 
   return router;
 };
