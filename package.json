@@ -19,6 +19,8 @@
     "@types/express-session": "^1.18.2",
     "@types/json-server": "^0.14.8",
     "@types/jsonwebtoken": "^9.0.10",
+    "@types/mongodb": "^4.0.6",
+    "@types/mongoose": "^5.11.96",
     "@types/node": "^25.5.2",
     "typescript": "^6.0.2"
   },
@@ -33,6 +35,8 @@
     "express-validator": "^7.3.2",
     "json-server": "^1.0.0-beta.15",
     "jsonwebtoken": "^9.0.3",
+    "mongodb": "^7.2.0",
+    "mongoose": "^9.5.0",
     "winston": "^3.19.0"
   },
   "repository": {

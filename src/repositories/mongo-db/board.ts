@@ -1,7 +1,7 @@
-// import { MongoDbRepository } from './base';
+import { MongoDbRepository } from './base';
 
-// export class BoardRepository extends MongoDbRepository {
-//   constructor() {
-//     super();
-//   }
-// }
+export class BoardRepository extends MongoDbRepository {
+  constructor() {
+    super('boards');
+  }
+}

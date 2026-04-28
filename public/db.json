@@ -83,12 +83,9 @@
   ],
   "tasks": [
     {
-      "id": "4f32a8b9-1e7d-4c5f-9b2a-0d8c3f4e5a6b",
-      "title": "Alex's task #1",
+      "title": "Alex's task #1.1",
       "description": "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam.",
-      "workflow": "todo",
-      "boardId": "d60275d0-b457-4531-85f9-8a98316b3433",
-      "authorId": "37d42238-a84d-47c4-8030-e3d0e91d43de"
+      "id": "4f32a8b9-1e7d-4c5f-9b2a-0d8c3f4e5a6b"
     },
     {
       "id": "5c1b9d0a-2f8e-4d6g-9c3b-1e9d4f5a6b7c",
@@ -142,7 +139,7 @@
       "id": "b17h5j6g-8l4k-9j2m-9i9h-7k5j0f1g2h3i",
       "title": "Alex's task #8",
       "description": "Nam libero tempore, cum soluta nobis est eligendi optio cumque nihil impedit quo minus id quod maxime placeat facere possimus.",
-      "workflow": "progress",
+      "workflow": "todo",
       "boardId": "d60275d0-b457-4531-85f9-8a98316b3433",
       "authorId": "37d42238-a84d-47c4-8030-e3d0e91d43de"
     },
@@ -150,7 +147,7 @@
       "id": "c28i6k7h-9m5l-a03n-9j0i-8l6k1g2h3i4j",
       "title": "Alex's task #9",
       "description": "Omnis voluptas assumenda est, omnis dolor repellendus. Temporibus autem quibusdam et aut officiis.",
-      "workflow": "todo",
+      "workflow": "progress",
       "boardId": "d60275d0-b457-4531-85f9-8a98316b3433",
       "authorId": "37d42238-a84d-47c4-8030-e3d0e91d43de"
     },
@@ -523,6 +520,46 @@
       "boardId": "ad9ba190-e4c8-4d66-bcc2-b1636a801220",
       "authorId": "1d2d9e51-c6cc-4edc-85e6-d9daa93d24a5",
       "createdAt": "2026-04-02T17:27:07.007Z"
+    },
+    {
+      "title": "New Task",
+      "description": "Task description",
+      "id": "8gjoU_d7Lzk"
+    },
+    {
+      "title": "Alex's Task #1",
+      "description": "Lorem Ipsum",
+      "id": "51hO5QqVzbU"
+    },
+    {
+      "title": "New Task #1",
+      "description": "Task description",
+      "id": "NolIVmL32Kw"
+    },
+    {
+      "title": "#1",
+      "description": "Task description",
+      "id": "kA4D-T1hGrI"
+    },
+    {
+      "title": "New Task #1",
+      "description": "Task description",
+      "id": "alcYpwkZQWs"
+    },
+    {
+      "title": "New Task 1",
+      "description": "Task description",
+      "id": "N_M1JIyZugc"
+    },
+    {
+      "title": "New Task 1",
+      "description": "Task description",
+      "id": "rRebLtQ_o4w"
+    },
+    {
+      "title": "New Task 1",
+      "description": "Task description",
+      "id": "VGoqjpwMQ8U"
     }
   ],
   "$schema": "./node_modules/json-server/schema.json"

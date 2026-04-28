@@ -1,7 +1,7 @@
 import { Router } from 'express';
 import { body, query } from 'express-validator';
 
-import { BoardRepository, TaskRepository } from '../../../repositories/json-db';
+import { BoardRepository, TaskRepository } from '../../../repositories/mongo-db';
 import { TaskService } from '../../../services';
 import { TaskController } from '../controllers/task';
 

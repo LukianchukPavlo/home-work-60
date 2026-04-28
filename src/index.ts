@@ -2,12 +2,12 @@ import path from 'node:path';
 import dotenv from 'dotenv';
 import { createApp } from './app';
 import { initLogger } from './modules/logger';
-import { connect } from './repositories/json-db/base';
+import { connect } from './repositories/mongo-db/base';
 
 dotenv.config({ path: path.join(__dirname, '..', '.env') });
 
 try {
-  const { PORT, DB_URI, DB_PORT, JWT_SECRET_KEY, COOKIE_SECRET_KEY, CLIENT_URLS } = process.env;
+  const { PORT, DB_URI, DB_PORT, DB_NAME, DB_USER, DB_PASSWORD, JWT_SECRET_KEY, COOKIE_SECRET_KEY, CLIENT_URLS } = process.env;
   
   if (!PORT) {
     console.error('PORT is not defined in environment variables');
@@ -15,10 +15,10 @@ try {
     throw new Error('PORT is not defined in environment variables');
   }
 
-  if (!DB_URI || !DB_PORT) {
-    console.error('DB_URI or DB_PORT is not defined in environment variables');
+  if (!DB_URI || !DB_PORT || !DB_NAME || !DB_USER || !DB_PASSWORD) {
+    console.error('One or more database environment variables are not defined (DB_URI, DB_PORT, DB_NAME, DB_USER, DB_PASSWORD)');
 
-    throw new Error('DB_URI or DB_PORT is not defined in environment variables');
+    throw new Error('One or more database environment variables are not defined (DB_URI, DB_PORT, DB_NAME, DB_USER, DB_PASSWORD)');
   }
 
   if (!JWT_SECRET_KEY || !COOKIE_SECRET_KEY) {
@@ -33,7 +33,13 @@ try {
     throw new Error('CLIENT_URLS is not defined in environment variables');
   }
 
-  connect(`${DB_URI}:${DB_PORT}`)
+  connect({
+    uri: DB_URI,
+    name: DB_NAME,
+    user: DB_USER,
+    password: DB_PASSWORD
+  })
+
     .then(() => {
 
       const logsPath = path.join(__dirname, 'logs');
