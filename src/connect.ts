@@ -1,19 +1,24 @@
-import { MongoClient } from 'mongodb';
+import { MongoClient, Db } from 'mongodb';
 
-process.env.MONGODB_URI = 'mongodb://localhost:27017';
+let client: MongoClient | null = null;
+let db: Db | null = null;
 
-export let CLIENT: MongoClient | null = null;
+export const connect = async (uri: string, dbName = 'app') => {
+  client = new MongoClient(uri);
 
-export const connect = async () => {
-  const uri = process.env.MONGODB_URI || '';
-  const client = new MongoClient(uri);
+  await client.connect();
 
-  try {
-    CLIENT = await client.connect();
-    console.log('Connected to MongoDB')
+  db = client.db(dbName);
 
-    return CLIENT;
-  } catch (error) {
-    console.error('Error connecting to MongoDB:', error);
+  console.log('✅ Connected to MongoDB');
+
+  return { client, db };
+};
+
+export const getDb = () => {
+  if (!db) {
+    throw new Error('Database not initialized. Call connect() first.');
   }
+
+  return db;
 };
