@@ -7,6 +7,8 @@ import type { IExtendedRequest, IUser } from '../interfaces';
 export const authValidation = (req: IExtendedRequest, res: Response, next: NextFunction) => {
   const token = req.session?.jwt;
 
+  console.log('🍪 SESSION:', req.session);
+
   if (!token) {
     return next(new UnauthorizedError('No authentication token provided'));
   }
@@ -17,6 +19,8 @@ export const authValidation = (req: IExtendedRequest, res: Response, next: NextF
       process.env.JWT_SECRET_KEY!
     ) as { user: Pick<IUser, 'id'> };
 
+    console.log('✅ TOKEN OK, USER:', payload.user);
+    
     req.user = payload.user;
   }
   catch {

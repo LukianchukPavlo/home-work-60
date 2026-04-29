@@ -103,6 +103,12 @@ export class TaskService {
 
     const task = await this.taskRepository.findById<ITask>(id);
 
+
+    console.log('🧠 UPDATE TASK');
+  console.log('USER ID:', request.user?.id);
+  console.log('TASK AUTHOR:', task?.authorId);
+  console.log('TASK ID:', id);
+  
     if (!task) {
       throw new NotFoundError('Task not found');
     }

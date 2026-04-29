@@ -8,13 +8,9 @@ dotenv.config({ path: path.join(__dirname, '..', '.env') });
 
 const { MONGODB_URI, PORT, DB_NAME } = process.env;
 
-if (!MONGODB_URI) {
-  throw new Error('MONGODB_URI missing');
-}
+if (!MONGODB_URI) throw new Error('MONGODB_URI missing');
 if (!DB_NAME) throw new Error('DB_NAME missing');
-if (!PORT) {
-  throw new Error('PORT missing');
-}
+if (!PORT) throw new Error('PORT missing');
 
 const logger = initLogger(path.join(__dirname, 'logs'));
 
@@ -22,15 +18,17 @@ const app = createApp({ loggerInstance: logger });
 
 (async () => {
   try {
+    console.log('🚀 Starting server...');
+
     await connect(MONGODB_URI, DB_NAME);
 
-    console.log('DB OK');
+    console.log('🔥 DB OK');
 
     app.listen(PORT, () => {
-      console.log(`Server running on ${PORT}`);
+      console.log(`✅ Server running on http://localhost:${PORT}`);
     });
   } catch (err) {
-    console.error('DB error:', err);
+    console.error('❌ FATAL ERROR:', err);
     process.exit(1);
   }
 })();
