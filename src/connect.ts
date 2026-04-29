@@ -22,3 +22,6 @@ export const getDb = () => {
 
   return db;
 };
+export const close = async () => {
+  await client?.close();
+};

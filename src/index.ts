@@ -6,12 +6,12 @@ import { connect } from './connect';
 
 dotenv.config({ path: path.join(__dirname, '..', '.env') });
 
-const { MONGODB_URI, PORT } = process.env;
+const { MONGODB_URI, PORT, DB_NAME } = process.env;
 
 if (!MONGODB_URI) {
   throw new Error('MONGODB_URI missing');
 }
-
+if (!DB_NAME) throw new Error('DB_NAME missing');
 if (!PORT) {
   throw new Error('PORT missing');
 }
@@ -22,7 +22,7 @@ const app = createApp({ loggerInstance: logger });
 
 (async () => {
   try {
-    await connect(MONGODB_URI, 'task-manager');
+    await connect(MONGODB_URI, DB_NAME);
 
     console.log('DB OK');
 
