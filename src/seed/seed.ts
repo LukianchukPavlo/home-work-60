@@ -1,8 +1,8 @@
 import data from '../../public/db.json';
-import { getDb } from '../connect';
+import { getDB } from '../repositories/mongo-db/base';
 
 export async function seed() {
-  const db = getDb();
+  const db = getDB();
 
   await db.collection('users').deleteMany({});
   await db.collection('boards').deleteMany({});
