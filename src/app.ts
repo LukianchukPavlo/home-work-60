@@ -23,6 +23,7 @@ export const createApp = ({ loggerInstance }: IApp): Application => {
     optionsSuccessStatus: 200,
   };
   
+  app.set('trust proxy', 1);
   app.use(cors(corsOptions));
 
   app.use('/static', express.static(staticPath));

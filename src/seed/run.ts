@@ -1,6 +1,6 @@
 import dotenv from 'dotenv';
 import path from 'path';
-import { connect } from '../repositories/mongo-db/base';
+import { connect } from '../repositories/mongoose/base';
 import { seed } from './seed';
 
 dotenv.config({ path: path.join(__dirname, '../../.env') });

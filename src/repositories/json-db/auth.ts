@@ -1,7 +1,7 @@
-import { JsonServerRepository } from './base';
+// import { JsonServerRepository } from './base';
 
-export class AuthRepository extends JsonServerRepository {
-  constructor() {
-    super('users');
-  }
-}
+// export class AuthRepository extends JsonServerRepository {
+//   constructor() {
+//     super('users');
+//   }
+// }

@@ -1,18 +1,19 @@
+import crypto from "crypto";
 import { validationResult } from "express-validator";
 import { transformWorkflow } from "../utils";
 import { ForbiddenError, NotFoundError, ValidationError } from "../common/errors";
 
-import {type IBoard, type IExtendedRequest, type IRepository, ITaskRepository } from "../interfaces";
-import { WorkflowCode } from '../interfaces/workflow'
-import type { ITask, TaskDataUpdate } from "../interfaces/entities/task";
+import { type IBoard, type IExtendedRequest, type IRepository, ITaskRepository } from "../interfaces";
+import  { WorkflowCode } from "../interfaces/workflow";
+import type { ITask } from "../interfaces/entities/task";
 
 type ConstructorParams = {
-  boardRepository: IRepository;
+  boardRepository: IRepository<IBoard>;
   taskRepository: ITaskRepository;
 };
 
 export class TaskService {
-  private boardRepository: IRepository;
+  private boardRepository: IRepository<IBoard>;
   private taskRepository: ITaskRepository;
 
   constructor({ boardRepository, taskRepository }: ConstructorParams) {
@@ -20,6 +21,7 @@ export class TaskService {
     this.taskRepository = taskRepository;
   }
 
+  // api/v1/tasks?boardId=:boardId
   public async getAllTasks(request: IExtendedRequest) {
     const { boardId = '' } = request.query!;
 
@@ -28,8 +30,8 @@ export class TaskService {
     if (!result.isEmpty()) {
       throw new ValidationError('Validation failed', result.array());
     }
-    
-    const board = await this.boardRepository.findById<IBoard>(boardId as string);
+
+    const board = await this.boardRepository.findById(boardId as string);
 
     if (!board) {
       throw new NotFoundError('Board not found');
@@ -39,8 +41,8 @@ export class TaskService {
       throw new ForbiddenError('You do not have permission to access this board');
     }
 
-    const tasks = await this.taskRepository.findByQuery<ITask>({
-      authorId: request.user!.id,
+    const tasks = await this.taskRepository.findByQuery({
+      authorId: request.user!.id as string,
       boardId: boardId as string
     });
 
@@ -55,7 +57,7 @@ export class TaskService {
   }
 
   public async getTaskById(req: IExtendedRequest, { id }: { id: string }) {
-    const task = await this.taskRepository.findById<ITask>(id);
+    const task = await this.taskRepository.findById(id);
   
     if (!task) {
       throw new NotFoundError('Task not found');
@@ -64,17 +66,16 @@ export class TaskService {
     if (task.authorId !== req.user!.id) {
       throw new ForbiddenError('You do not have permission to access this task');
     }
-  
+
     return {
       ...task,
       workflow: transformWorkflow(task.workflow as WorkflowCode),
     };
   }
 
-
   public async createTask(request: IExtendedRequest, { taskData }: { taskData: ITask }) {
     const result = validationResult(request);
-    
+
     if (!result.isEmpty()) {
       throw new ValidationError('Validation failed', result.array());
     }
@@ -84,16 +85,15 @@ export class TaskService {
       description: taskData.description || '',
       workflow: taskData.workflow || WorkflowCode.TODO,
       id: crypto.randomUUID(),
-      authorId: request.user!.id,
+      authorId: request.user!.id as string,
     };
 
-    return this.taskRepository.create<ITask, ITask>(payload);
+    return this.taskRepository.create(payload);
   }
-
 
   public async updateTask(
     request: IExtendedRequest,
-    { id, taskData }: { id: string, taskData: TaskDataUpdate }
+    { id, taskData }: { id: string, taskData: ITask }
   ) {
     const result = validationResult(request);
     
@@ -101,14 +101,8 @@ export class TaskService {
       throw new ValidationError('Validation failed', result.array());
     }
 
-    const task = await this.taskRepository.findById<ITask>(id);
+    const task = await this.taskRepository.findById(id);
 
-
-    console.log('🧠 UPDATE TASK');
-  console.log('USER ID:', request.user?.id);
-  console.log('TASK AUTHOR:', task?.authorId);
-  console.log('TASK ID:', id);
-  
     if (!task) {
       throw new NotFoundError('Task not found');
     }
@@ -117,8 +111,8 @@ export class TaskService {
       throw new ForbiddenError('You do not have permission to update this task');
     }
 
-    const updatedTask = await this.taskRepository.update<TaskDataUpdate, ITask>(id, taskData);
-  
+    const updatedTask = await this.taskRepository.update(id, taskData);
+
     return {
       ...updatedTask,
       workflow: transformWorkflow(updatedTask.workflow as WorkflowCode),
@@ -127,15 +121,15 @@ export class TaskService {
 
   public async updateTaskWorkflow(
     request: IExtendedRequest,
-    { id, taskData }: { id: string, taskData: TaskDataUpdate }
+    { id, taskData }: { id: string, taskData: Pick<ITask, 'workflow'> }
   ) {
     const result = validationResult(request);
-    
+
     if (!result.isEmpty()) {
       throw new ValidationError('Validation failed', result.array());
     }
 
-    const task = await this.taskRepository.findById<ITask>(id);
+    const task = await this.taskRepository.findById(id);
 
     if (!task) {
       throw new NotFoundError('Task not found');
@@ -145,20 +139,19 @@ export class TaskService {
       throw new ForbiddenError('You do not have permission to update this task');
     }
 
-    const updatedTask = await this.taskRepository.updateTaskWorkflow<TaskDataUpdate, ITask>(id, taskData);
-  
+    const updatedTask = await this.taskRepository.updateTaskWorkflow(id, taskData);
+
     return {
       ...updatedTask,
       workflow: transformWorkflow(updatedTask.workflow as WorkflowCode),
     };
   }
 
-
   public async deleteTask(
     request: IExtendedRequest,
     { id }: { id: string }
   ) {
-    const task = await this.taskRepository.findById<ITask>(id);
+    const task = await this.taskRepository.findById(id);
 
     if (!task) {
       throw new NotFoundError('Task not found');
@@ -170,5 +163,4 @@ export class TaskService {
 
     return this.taskRepository.delete(id);
   }
-
 }

@@ -1,7 +1,7 @@
 import { Router } from 'express';
 import { body } from 'express-validator';
 
-import { AuthRepository } from '../../../repositories/mongo-db';
+import { AuthRepository } from '../../../repositories/mongoose';
 import { AuthService } from '../../../services';
 import { AuthController } from '../controllers/auth';
 import { validateRequest } from '../../../middlewares';

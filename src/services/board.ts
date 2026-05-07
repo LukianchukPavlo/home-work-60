@@ -23,7 +23,7 @@ export class BoardService {
   public async getBoardTasks(request: IExtendedRequest) {
     const { boardId } = request.params!;
 
-    const board = await this.boardRepository.findById<IBoard>(boardId as string);
+    const board = await this.boardRepository.findById(boardId as string);
 
     if (board && board.authorId !== request.user!.id) {
       throw new ForbiddenError('You do not have permission to access this board');
@@ -33,7 +33,7 @@ export class BoardService {
       throw new NotFoundError('Board not found');
     }
 
-    const tasks = await this.taskRepository.findByQuery<ITask>({
+    const tasks = await this.taskRepository.findByQuery({
       authorId: request.user!.id,
       boardId: boardId as string
     });
@@ -49,7 +49,7 @@ export class BoardService {
   }
 
   public async getAllBoards(request: IExtendedRequest) {
-    const boards = await this.boardRepository.findByQuery<IBoard>({ authorId: request.user!.id });
+    const boards = await this.boardRepository.findByQuery({ authorId: request.user!.id });
 
     if (!boards.length) {
       throw new NotFoundError('No boards found');
@@ -62,7 +62,7 @@ export class BoardService {
     request: IExtendedRequest,
     { id }: { id: string }
   ) {
-    const board = await this.boardRepository.findById<IBoard>(id);
+    const board = await this.boardRepository.findById(id);
 
     if (board && board.authorId !== request.user!.id) {
       throw new ForbiddenError('You do not have permission to access this board');
@@ -91,7 +91,7 @@ export class BoardService {
       authorId: request.user!.id,
     };
 
-    const newBoard = await this.boardRepository.create<IBoard, BoardDataCreate>(payload);
+    const newBoard = await this.boardRepository.create(payload);
 
     return newBoard;
   }
@@ -100,7 +100,7 @@ export class BoardService {
     request: IExtendedRequest,
     { id, boardData }: { id: string, boardData: BoardDataUpdate }
   ) {
-    const board = await this.boardRepository.findById<IBoard>(id);
+    const board = await this.boardRepository.findById(id);
 
     if (board && board.authorId !== request.user!.id) {
       throw new ForbiddenError('You do not have permission to update this board');
@@ -112,7 +112,7 @@ export class BoardService {
       throw new ValidationError('Validation failed', result.array());
     }
 
-    const updatedBoard = await this.boardRepository.update<BoardDataUpdate, BoardDataUpdate>(id, boardData);
+    const updatedBoard = await this.boardRepository.update(id, boardData);
 
     if (!updatedBoard) {
       throw new NotFoundError('Board not found');
@@ -122,7 +122,7 @@ export class BoardService {
   }
 
   public async deleteBoard(request: IExtendedRequest, { id }: { id: string }) {
-    const board = await this.boardRepository.findById<IBoard>(id);
+    const board = await this.boardRepository.findById(id);
 
     if (board && board.authorId !== request.user!.id) {
       throw new ForbiddenError('You do not have permission to delete this board');

@@ -8,7 +8,7 @@ import { InvalidCredentialsError, ValidationError, NotFoundError } from "../comm
 import type { IExtendedRequest, IRepository, IUser, UserDataReturn, ConstructorParams } from "../interfaces";
 
 export class AuthService {
-  private readonly repository: IRepository;
+  private readonly repository: IRepository<IUser>;
 
   constructor({ repository }: ConstructorParams) {
     this.repository = repository;
@@ -21,7 +21,7 @@ export class AuthService {
       throw new NotFoundError('User not found');
     }
 
-    const user = await this.repository.findById<IUser>(userId);
+    const user = await this.repository.findById(userId);
 
     if (!user) {
       throw new NotFoundError('User not found');
@@ -31,7 +31,6 @@ export class AuthService {
       id: user.id,
       name: user.name,
       email: user.email,
-      createdAt: user.createdAt,
     };
   }
 
@@ -43,7 +42,7 @@ export class AuthService {
       throw new ValidationError('Validation failed', result.array());
     }
 
-    const [existingUser] = await this.repository.findByQuery<IUser>({ email });
+    const [existingUser] = await this.repository.findByQuery({ email });
 
     if (existingUser) {
       throw new ValidationError('User with this email already exists');
@@ -51,15 +50,14 @@ export class AuthService {
 
     const hashedPassword = await Password.hash(password);
 
-    const newUser: IUser = {
+    const newUser = {
       id: crypto.randomUUID(),
       name,
       email,
       password: hashedPassword,
-      createdAt: new Date().toISOString(),
     };
 
-    const createdUser = await this.repository.create<IUser, IUser>(newUser);
+    const createdUser = await this.repository.create(newUser);
     
     const token = jwt.sign(
       {
@@ -85,7 +83,7 @@ export class AuthService {
       throw new ValidationError('Validation failed', result.array());
     }
 
-    const [existingUser] = await this.repository.findByQuery<IUser>({ email })
+    const [existingUser] = await this.repository.findByQuery({ email }) || [];
 
     if (!existingUser) {
       throw new InvalidCredentialsError('Invalid email or password');

@@ -1,17 +1,23 @@
 import data from '../../public/db.json';
-import { getDB } from '../repositories/mongo-db/base';
+
+import { User } from '../models/user';
+import { Board } from '../models/board';
+import { Task } from '../models/task';
 
 export async function seed() {
-  const db = getDB();
+  try {
+    
+    await User.deleteMany({});
+    await Board.deleteMany({});
+    await Task.deleteMany({});
 
-  await db.collection('users').deleteMany({});
-  await db.collection('boards').deleteMany({});
-  await db.collection('tasks').deleteMany({});
+    
+    await User.insertMany(data.users);
+    await Board.insertMany(data.boards);
+    await Task.insertMany(data.tasks);
 
-  await db.collection('users').insertMany(data.users);
-  await db.collection('boards').insertMany(data.boards);
-  await db.collection('tasks').insertMany(data.tasks);
-
-  console.log('🌱 Seed done');
-  
+    console.log('🌱 Seed done');
+  } catch (error) {
+    console.error('❌ Seed failed:', error);
+  }
 }
