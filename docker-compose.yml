@@ -1,0 +1,35 @@
+services:
+  app:
+    build: .
+
+    container_name: task-manager-app
+
+    ports:
+      - '3001:3000'
+
+    volumes:
+      - .:/app
+      - /app/node_modules
+
+    environment:
+      PORT: 3000
+      DB_URI: mongodb://mongo:27017/task-manager
+
+    depends_on:
+      - mongo
+
+    command: npm run start
+
+  mongo:
+    image: mongo
+
+    container_name: task-manager-mongo
+
+    ports:
+      - '27017:27017'
+
+    volumes:
+      - mongo-data:/data/db
+
+volumes:
+  mongo-data:
