@@ -1,6 +1,5 @@
 import data from '../../public/db.json';
-
-import { User } from '../models/user';
+import { User } from '../models/user'; 
 import { Board } from '../models/board';
 import { Task } from '../models/task';
 

@@ -11,6 +11,11 @@ declare global {
       session: CookieSessionInterfaces.CookieSessionObject & {
         jwt?: string;
       } | null;
+      log?: Logger;
+      user?: User;
     }
-  }
+    interface User extends Pick<IUser, 'id'> {
+      id?: string;
+    }
+  } 
 }

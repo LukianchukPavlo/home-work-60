@@ -1,5 +1,5 @@
 import path from 'node:path';
-import express, { type Application, type Response, type NextFunction } from 'express';
+import express, { type Application, type Response, type NextFunction, type Request } from 'express';
 import session from 'cookie-session';
 import cors from "cors"
 
@@ -7,7 +7,7 @@ import { router as apiV1 } from './api/v1/routes';
 import { loggerMiddleware } from './middlewares/logger.middleware';
 import { BaseError, NotFoundError } from './common/errors';
 
-import { ErrorCodes, StatusCodes, type IApp, type IExtendedRequest } from './interfaces';
+import { ErrorCodes, StatusCodes, type IApp } from './interfaces';
 
 export const createApp = ({ loggerInstance }: IApp): Application => {
   const staticPath = path.join(__dirname, '..' ,'public');
@@ -34,20 +34,20 @@ export const createApp = ({ loggerInstance }: IApp): Application => {
       maxAge: 24 * 60 * 60 * 1000, 
       httpOnly: true,
       secure: process.env.NODE_ENV === 'production',
-      sameSite: 'lax', 
+      sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax', 
   }));
   app.use(loggerMiddleware(loggerInstance));
 
-  app.get('/', (req: IExtendedRequest, res: Response) => {
+  app.get('/', (req: Request, res: Response) => {
     res.status(200).json({ message: 'Welcome to the Tasks Manager API' });
   });
   app.use('/api/v1', apiV1);
 
-  app.use((req: IExtendedRequest, res: Response, next: NextFunction) => {
+  app.use((req: Request, res: Response, next: NextFunction) => {
     next(new NotFoundError(`Route ${req.method} ${req.path} not found`));
   });
 
-  app.use((error: Error, req: IExtendedRequest, res: Response, next: NextFunction) => {
+  app.use((error: Error, req: Request, res: Response, next: NextFunction) => {
     const {
       message = 'Something went wrong',
       ...restArgs

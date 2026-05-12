@@ -3,7 +3,8 @@ import { validationResult } from "express-validator";
 import { transformWorkflow } from "../utils";
 import { ForbiddenError, NotFoundError, ValidationError } from "../common/errors";
 
-import { type IBoard, type IExtendedRequest, type IRepository, ITaskRepository } from "../interfaces";
+import type { Request } from "express";
+import { type IBoard, type IRepository, ITaskRepository } from "../interfaces";
 import  { WorkflowCode } from "../interfaces/workflow";
 import type { ITask } from "../interfaces/entities/task";
 
@@ -21,8 +22,7 @@ export class TaskService {
     this.taskRepository = taskRepository;
   }
 
-  // api/v1/tasks?boardId=:boardId
-  public async getAllTasks(request: IExtendedRequest) {
+  public async getAllTasks(request: Request) {
     const { boardId = '' } = request.query!;
 
     const result = validationResult(request);
@@ -56,7 +56,7 @@ export class TaskService {
     }));
   }
 
-  public async getTaskById(req: IExtendedRequest, { id }: { id: string }) {
+  public async getTaskById(req: Request, { id }: { id: string }) {
     const task = await this.taskRepository.findById(id);
   
     if (!task) {
@@ -73,7 +73,7 @@ export class TaskService {
     };
   }
 
-  public async createTask(request: IExtendedRequest, { taskData }: { taskData: ITask }) {
+  public async createTask(request: Request, { taskData }: { taskData: ITask }) {
     const result = validationResult(request);
 
     if (!result.isEmpty()) {
@@ -92,7 +92,7 @@ export class TaskService {
   }
 
   public async updateTask(
-    request: IExtendedRequest,
+    request: Request,
     { id, taskData }: { id: string, taskData: ITask }
   ) {
     const result = validationResult(request);
@@ -120,7 +120,7 @@ export class TaskService {
   }
 
   public async updateTaskWorkflow(
-    request: IExtendedRequest,
+    request: Request,
     { id, taskData }: { id: string, taskData: Pick<ITask, 'workflow'> }
   ) {
     const result = validationResult(request);
@@ -148,7 +148,7 @@ export class TaskService {
   }
 
   public async deleteTask(
-    request: IExtendedRequest,
+    request: Request,
     { id }: { id: string }
   ) {
     const task = await this.taskRepository.findById(id);
@@ -162,5 +162,41 @@ export class TaskService {
     }
 
     return this.taskRepository.delete(id);
+  }
+
+  public async getTasksWithCursor(request: Request) {
+    const { boardId = '' } = request.query!;
+
+    const board = await this.boardRepository.findById(boardId as string);
+
+    if (!board) {
+      throw new NotFoundError('Board not found');
+    }
+
+    if (board.authorId !== request.user!.id) {
+      throw new ForbiddenError('You do not have permission to access this board');
+    }
+
+    const cursor = this.taskRepository.getTasksCursor({
+      authorId: request.user!.id as string,
+      boardId: boardId as string,
+    });
+
+    const tasks = [];
+
+    for await (const task of cursor) {
+      tasks.push({
+        ...task,
+        workflow: transformWorkflow(task.workflow as WorkflowCode),
+      });
+    }
+
+    return tasks;
+  }
+
+  public async getTasksStatistics(request: Request) {
+    return this.taskRepository.getTasksStatistics(
+      request.user!.id as string
+    );
   }
 }

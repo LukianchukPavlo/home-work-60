@@ -1,6 +1,6 @@
-import type { NextFunction, Response } from 'express';
+import type { NextFunction, Response, Request } from 'express';
 
-import { StatusCodes, type IExtendedRequest } from '../../../interfaces';
+import { StatusCodes } from '../../../interfaces';
 import type { BoardService } from '../../../services';
 
 type ConstructorParams = {
@@ -14,7 +14,7 @@ export class BoardController {
     this.boardService = boardService;
   }
 
-  public async getBoardTasks(req: IExtendedRequest, res: Response, next: NextFunction) {
+  public async getBoardTasks(req: Request, res: Response, next: NextFunction) {
     try {
       const tasks = await this.boardService.getBoardTasks(req);
 
@@ -26,7 +26,7 @@ export class BoardController {
     }
   }
 
-  public async getBoards(req: IExtendedRequest, res: Response, next: NextFunction) {
+  public async getBoards(req: Request, res: Response, next: NextFunction) {
     try {
       const boards = await this.boardService.getAllBoards(req);
 
@@ -38,7 +38,7 @@ export class BoardController {
     }
   }
 
-  public async getBoardById(req: IExtendedRequest, res: Response, next: NextFunction) {
+  public async getBoardById(req: Request, res: Response, next: NextFunction) {
     try {
       const { boardId = '' } = req.params;
       const board = await this.boardService.getBoardById(req, { id: boardId as string });
@@ -51,7 +51,7 @@ export class BoardController {
     }
   }
 
-  public async createBoard(req: IExtendedRequest, res: Response, next: NextFunction) {
+  public async createBoard(req: Request, res: Response, next: NextFunction) {
     try {
       const boardData = req.body;
       const newBoard = await this.boardService.createBoard(req, { boardData });
@@ -64,7 +64,7 @@ export class BoardController {
     }
   }
 
-  public async updateBoard(req: IExtendedRequest, res: Response, next: NextFunction) {
+  public async updateBoard(req: Request, res: Response, next: NextFunction) {
     try {
       const { boardId = '' } = req.params;
       const boardData = req.body;
@@ -79,7 +79,7 @@ export class BoardController {
     }
   }
 
-  public async deleteBoard(req: IExtendedRequest, res: Response, next: NextFunction) {
+  public async deleteBoard(req: Request, res: Response, next: NextFunction) {
     try {
       const { boardId = '' } = req.params;
 

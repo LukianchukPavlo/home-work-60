@@ -10,61 +10,95 @@ export const createTaskRouter = (): Router => {
 
   const boardRepository = new BoardRepository();
   const taskRepository = new TaskRepository();
-  const service = new TaskService({ boardRepository, taskRepository });
-  const controller = new TaskController({ taskService: service });
 
+  const service = new TaskService({
+    boardRepository,
+    taskRepository,
+  });
+
+  const controller = new TaskController({
+    taskService: service,
+  });
+
+  // GET ALL TASKS
   router.get(
     '/',
     [
       query('boardId')
         .notEmpty()
         .trim()
-        .withMessage('boardId query parameter is required')
+        .withMessage('boardId query parameter is required'),
     ],
     controller.getAllTasks.bind(controller)
-    );
+  );
 
-    router.get(
+  // CURSOR
+  router.get(
+    '/cursor',
+    [
+      query('boardId')
+        .notEmpty()
+        .trim()
+        .withMessage('boardId query parameter is required'),
+    ],
+    controller.getTasksWithCursor.bind(controller)
+  );
+
+  // AGGREGATION
+  router.get(
+    '/statistics',
+    controller.getTasksStatistics.bind(controller)
+  );
+
+  // GET TASK BY ID
+  router.get(
     '/:taskId',
     controller.getTaskById.bind(controller)
-    );
+  );
 
-    router.post(
+  // CREATE TASK
+  router.post(
     '/',
     [
       body('boardId')
         .notEmpty()
         .trim()
         .withMessage('boardId is required'),
+
       body('title')
         .notEmpty()
         .trim()
         .withMessage('Title is required'),
+
       body('description')
         .optional()
         .trim(),
+
       body('workflow')
         .optional()
         .isIn(['todo', 'progress', 'done'])
         .withMessage('Workflow must be one of: todo, progress, done'),
     ],
     controller.createTask.bind(controller)
-    );
+  );
 
-    router.put(
+  // UPDATE TASK
+  router.put(
     '/:taskId',
     [
       body('title')
         .optional()
         .trim(),
+
       body('description')
         .optional()
         .trim(),
     ],
     controller.updateTask.bind(controller)
-    );
+  );
 
-    router.put(
+  // UPDATE WORKFLOW
+  router.put(
     '/:taskId/workflow',
     [
       body('workflow')
@@ -73,18 +107,13 @@ export const createTaskRouter = (): Router => {
         .withMessage('Workflow must be one of: todo, progress, done'),
     ],
     controller.updateTaskWorkflow.bind(controller)
-    );
+  );
 
-    router.delete(
+  // DELETE TASK
+  router.delete(
     '/:taskId',
     controller.deleteTask.bind(controller)
-    );
-
-
-
-
-
+  );
 
   return router;
 };
-

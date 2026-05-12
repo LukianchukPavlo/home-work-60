@@ -1,7 +1,7 @@
 import { AuthService } from "../../../services";
 
-import { StatusCodes, type IExtendedRequest } from '../../../interfaces';
-import type { NextFunction, Response } from 'express';
+import { StatusCodes } from '../../../interfaces';
+import type { NextFunction, Response, Request } from 'express';
 
 type ConstructorParams = {
   authService: AuthService;
@@ -14,7 +14,7 @@ export class AuthController {
     this.authService = authService;
   }
   
-  public async getMe(req: IExtendedRequest, res: Response, next: NextFunction) {
+  public async getMe(req: Request, res: Response, next: NextFunction) {
     return this.authService
       .getMe(req)
       .then(user => {
@@ -27,7 +27,7 @@ export class AuthController {
       });
   }
 
-  async signUp(req: IExtendedRequest, res: Response, next: NextFunction) {
+  async signUp(req: Request, res: Response, next: NextFunction) {
     const { name, email, password } = req.body;
 
     this.authService
@@ -47,7 +47,7 @@ export class AuthController {
       });
   }
 
-  async signIn(req: IExtendedRequest, res: Response, next: NextFunction) {
+  async signIn(req: Request, res: Response, next: NextFunction) {
     const { email, password } = req.body;
 
     this.authService
@@ -65,7 +65,7 @@ export class AuthController {
       });
   }
 
-  async signOut(req: IExtendedRequest, res: Response, next: NextFunction) {
+  async signOut(req: Request, res: Response, next: NextFunction) {
     this.authService
     .signOut(req)
     .then(() => {

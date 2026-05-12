@@ -64,45 +64,45 @@ let server: Server | null = null;
   process.exit(1);
 }
 
-// const closeServer = async (): Promise<void> => {
-//   return new Promise((resolve, reject) => {
-//     if (server) {
-//       server.close((err) => {
-//         if (err) return reject(err);
-//         console.log('HTTP server closed.');
-//         resolve();
-//       });
-//     } else {
-//       resolve();
-//     }
-//   });
-// };
+const closeServer = async (): Promise<void> => {
+  return new Promise((resolve, reject) => {
+    if (server) {
+      server.close((err) => {
+        if (err) return reject(err);
+        console.log('HTTP server closed.');
+        resolve();
+      });
+    } else {
+      resolve();
+    }
+  });
+};
 
-// const gracefulShutdown = async (signal: string) => {
-//   console.log(`Received ${signal}. Shutting down gracefully...`);
+const gracefulShutdown = async (signal: string) => {
+  console.log(`Received ${signal}. Shutting down gracefully...`);
   
-//   const timeout = setTimeout(() => {
-//     console.error('Could not close connections in time, forcefully shutting down');
+  const timeout = setTimeout(() => {
+    console.error('Could not close connections in time, forcefully shutting down');
 
-//     process.exit(1);
-//   }, 10000)
+    process.exit(1);
+  }, 10000)
 
-//   try {
-//     await closeServer();
-//     await closeDB();
+  try {
+    await closeServer();
+    await closeDB();
 
-//     clearTimeout(timeout);
+    clearTimeout(timeout);
 
-//     console.log('Graceful shutdown finished. Bye!');
+    console.log('Graceful shutdown finished. Bye!');
 
-//     process.exit(0);
+    process.exit(0);
 
-//   } catch (e) {
-//     console.error('Error during shutdown', { error: e });
-//     process.exit(1);
-//   }
-// };
+  } catch (e) {
+    console.error('Error during shutdown', { error: e });
+    process.exit(1);
+  }
+};
 
-// ['SIGINT', 'SIGTERM'].forEach((signal) => {
-//   process.on(signal, () => gracefulShutdown(signal));
-// });
+['SIGINT', 'SIGTERM'].forEach((signal) => {
+  process.on(signal, () => gracefulShutdown(signal));
+});

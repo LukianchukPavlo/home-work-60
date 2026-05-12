@@ -1,6 +1,6 @@
-import type { Response, NextFunction } from 'express';
+import type { Response, NextFunction, Request } from 'express';
 import type { TaskService } from '../../../services';
-import { StatusCodes, type IExtendedRequest } from '../../../interfaces';
+import { StatusCodes } from '../../../interfaces';
 
 type ConstructorParams = {
   taskService: TaskService;
@@ -13,7 +13,7 @@ export class TaskController {
     this.taskService = taskService;
   }
 
-  public async getAllTasks(req: IExtendedRequest, res: Response, next: NextFunction) {
+  public async getAllTasks(req: Request, res: Response, next: NextFunction) {
     try {
       const tasks = await this.taskService.getAllTasks(req);
 
@@ -25,7 +25,7 @@ export class TaskController {
     }
   }
 
-  public async getTaskById(req: IExtendedRequest, res: Response, next: NextFunction) {
+  public async getTaskById(req: Request, res: Response, next: NextFunction) {
     const { taskId = '' } = req.params;
 
     try {
@@ -39,7 +39,7 @@ export class TaskController {
     }
   }
 
-  public async createTask(req: IExtendedRequest, res: Response, next: NextFunction) {
+  public async createTask(req: Request, res: Response, next: NextFunction) {
     try {
       const taskData = req.body;
       const newTask = await this.taskService.createTask(req, { taskData });
@@ -53,7 +53,7 @@ export class TaskController {
   }
 
 
-  public async updateTask(req: IExtendedRequest, res: Response, next: NextFunction) {
+  public async updateTask(req: Request, res: Response, next: NextFunction) {
     try {
       const { taskId } = req.params;
       const taskData = req.body;
@@ -68,7 +68,7 @@ export class TaskController {
     }
   }
 
-  public async updateTaskWorkflow(req: IExtendedRequest, res: Response, next: NextFunction) {
+  public async updateTaskWorkflow(req: Request, res: Response, next: NextFunction) {
     try {
       const { taskId } = req.params;
       const { workflow } = req.body;
@@ -83,7 +83,7 @@ export class TaskController {
     }
   }
 
-  public async deleteTask(req: IExtendedRequest, res: Response, next: NextFunction) {
+  public async deleteTask(req: Request, res: Response, next: NextFunction) {
     try {
       const { taskId } = req.params;
   
@@ -96,8 +96,36 @@ export class TaskController {
       next(error);
     }
   }
+  
+  public async getTasksWithCursor(
+    req: Request,
+    res: Response,
+    next: NextFunction
+  ) {
+    try {
+      const tasks = await this.taskService.getTasksWithCursor(req);
 
+      res.status(StatusCodes.SUCCESS).json({ data: tasks });
+    } catch (error) {
+      req?.log?.error(`Failed to fetch tasks with cursor`, { error });
 
+      next(error);
+    }
+  }
 
+  public async getTasksStatistics(
+    req: Request,
+    res: Response,
+    next: NextFunction
+  ) {
+    try {
+      const stats = await this.taskService.getTasksStatistics(req);
 
+      res.status(StatusCodes.SUCCESS).json({ data: stats });
+    } catch (error) {
+      req?.log?.error(`Failed to fetch tasks statistics`, { error });
+
+      next(error);
+    }
+  }
 }

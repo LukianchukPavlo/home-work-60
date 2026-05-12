@@ -2,8 +2,8 @@ import crypto from "node:crypto";
 import { validationResult } from "express-validator";
 import { transformWorkflow } from "../utils";
 import { ForbiddenError, NotFoundError, ValidationError } from "../common/errors";
-
-import type { IExtendedRequest, IRepository, ITask } from "../interfaces";
+import { Request } from "express";
+import type { IRepository, ITask } from "../interfaces";
 import type { WorkflowCode } from '../interfaces/workflow'
 import type { IBoard, BoardDataUpdate, BoardDataCreate } from "../interfaces/entities/board";
 
@@ -20,7 +20,7 @@ export class BoardService {
     this.taskRepository = taskRepository;
   }
 
-  public async getBoardTasks(request: IExtendedRequest) {
+  public async getBoardTasks(request: Request) {
     const { boardId } = request.params!;
 
     const board = await this.boardRepository.findById(boardId as string);
@@ -48,7 +48,7 @@ export class BoardService {
     }));
   }
 
-  public async getAllBoards(request: IExtendedRequest) {
+  public async getAllBoards(request: Request) {
     const boards = await this.boardRepository.findByQuery({ authorId: request.user!.id });
 
     if (!boards.length) {
@@ -59,7 +59,7 @@ export class BoardService {
   }
 
   public async getBoardById(
-    request: IExtendedRequest,
+    request: Request,
     { id }: { id: string }
   ) {
     const board = await this.boardRepository.findById(id);
@@ -76,7 +76,7 @@ export class BoardService {
   }
 
   public async createBoard(
-    request: IExtendedRequest,
+    request: Request,
     { boardData }: { boardData: BoardDataCreate }
   ) {
     const result = validationResult(request);
@@ -97,7 +97,7 @@ export class BoardService {
   }
 
   public async updateBoard(
-    request: IExtendedRequest,
+    request: Request,
     { id, boardData }: { id: string, boardData: BoardDataUpdate }
   ) {
     const board = await this.boardRepository.findById(id);
@@ -121,7 +121,7 @@ export class BoardService {
     return updatedBoard;
   }
 
-  public async deleteBoard(request: IExtendedRequest, { id }: { id: string }) {
+  public async deleteBoard(request: Request, { id }: { id: string }) {
     const board = await this.boardRepository.findById(id);
 
     if (board && board.authorId !== request.user!.id) {

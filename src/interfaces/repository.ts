@@ -12,9 +12,17 @@ export interface IRepository<M extends { id: string; } = any> {
 
 export interface ITaskRepository extends IRepository<ITask> {
   updateTaskWorkflow(id: string, data: Pick<ITask, 'workflow'>): Promise<ITask>;
+
+  getTasksCursor(query: Partial<ITask>): AsyncIterable<ITask>;
+
+  getTasksStatistics(authorId: string): Promise<{
+    totalTasks: number;
+    todoTasks: number;
+    progressTasks: number;
+    doneTasks: number;
+  }>;
 }
 
 export type ConstructorParams<R extends IRepository = IRepository> = {
   repository: R;
 };
-

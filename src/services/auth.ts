@@ -1,11 +1,11 @@
 import crypto from "node:crypto";
 import jwt from "jsonwebtoken";
 import { validationResult } from "express-validator";
-
+import { Request } from "express";
 import { Password } from "../modules/Password";
 import { InvalidCredentialsError, ValidationError, NotFoundError } from "../common/errors";
 
-import type { IExtendedRequest, IRepository, IUser, UserDataReturn, ConstructorParams } from "../interfaces";
+import type { IRepository, IUser, UserDataReturn, ConstructorParams } from "../interfaces";
 
 export class AuthService {
   private readonly repository: IRepository<IUser>;
@@ -14,7 +14,7 @@ export class AuthService {
     this.repository = repository;
   }
 
-  public async getMe(request: IExtendedRequest): Promise<UserDataReturn> {
+  public async getMe(request: Request): Promise<UserDataReturn> {
     const userId = request.user?.id;
 
     if (!userId) {
@@ -35,7 +35,7 @@ export class AuthService {
   }
 
 
-  public async signUp(request: IExtendedRequest, { name, email, password }: Pick<IUser, 'name' | 'email' | 'password'>): Promise<UserDataReturn> {
+  public async signUp(request: Request, { name, email, password }: Pick<IUser, 'name' | 'email' | 'password'>): Promise<UserDataReturn> {
     const result = validationResult(request);
 
     if (!result.isEmpty()) {
@@ -76,7 +76,7 @@ export class AuthService {
     return userData;
   }
 
-  public async signIn(request: IExtendedRequest, { email, password }: Pick<IUser, 'email' | 'password'>): Promise<UserDataReturn> {
+  public async signIn(request: Request, { email, password }: Pick<IUser, 'email' | 'password'>): Promise<UserDataReturn> {
     const result = validationResult(request);
 
     if (!result.isEmpty()) {
@@ -112,7 +112,7 @@ export class AuthService {
     return userData;
   }
 
-  public async signOut(request: IExtendedRequest): Promise<void> {
+  public async signOut(request: Request): Promise<void> {
     request.session = null;
   }
 }
