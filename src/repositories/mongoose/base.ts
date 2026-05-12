@@ -24,7 +24,7 @@ export abstract class MongooseRepository<M extends { id: string }> implements IR
 
   public async findById(id: string): Promise<M | null> {
     const document = await this.model
-      .findOne({ id }) 
+      .findOne({ id }) // UUID
       .lean<M>();
 
     return document;
@@ -38,32 +38,36 @@ export abstract class MongooseRepository<M extends { id: string }> implements IR
     return documents;
   }
 
-  public async create(data: M): Promise<M> {
+  public async create(data: Partial<M>): Promise<M> {
     const document = await this.model
       .create(data);
 
     return document.toObject() as M;
   }
 
-  public async createMany(data: M[]): Promise<M[]> {
+  public async createMany(data: Partial<M>[]): Promise<M[]> {
     const documents = await this.model
       .create(data);
 
     return documents.map((doc) => doc.toObject()) as M[];
   }
 
-  public async update(id: string, data: M): Promise<M> {
+  public async update(id: string, data: Partial<M>): Promise<M> {
     const document = await this.model
       .findOneAndUpdate({ id }, data, { returnDocument: 'after' })
       .lean();
 
     return document as M;
   }
-
-
+  
   public async delete(id: string): Promise<void> {
     await this.model
       .deleteOne({ id });
+  }
+
+  public async deleteByQuery(query: Partial<M>): Promise<void> {
+    await this.model
+      .deleteMany(query);
   }
 }
 
@@ -72,17 +76,37 @@ export const connect = async (options: DBOptions) => {
     .replace('{{user}}', encodeURIComponent(options.user))
     .replace('{{password}}', encodeURIComponent(options.password));
 
-  mongoose.connect(uri, {
+  return mongoose.connect(uri, {
     dbName: options.name,
   });
 };
 
 export const getClient = () => {
-  return mongoose.connection;
+  return mongoose.connection.getClient();
 };
 
 export const getDB = () => {
   return mongoose.connection.db;
+};
+
+export const cleanDB = async () => {
+  if (!mongoose.connection) {
+    throw new Error('Client not initialized. Please call connect() first.');
+  }
+
+  if (!mongoose.connection.db) {
+    throw new Error('Client not initialized. Please call connect() first.');
+  }
+
+  const collections = await mongoose.connection.db
+    .listCollections()
+    .toArray();
+
+  if (collections) {
+    for (const collection of collections) {
+      await mongoose.connection.db.collection(collection.name).deleteMany({});
+    }
+  }
 };
 
 export const closeDB = async () => {

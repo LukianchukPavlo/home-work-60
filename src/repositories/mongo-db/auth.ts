@@ -1,7 +1,7 @@
-import { MongoDbRepository } from './base';
+// import { MongoDbRepository } from './base';
 
-export class AuthRepository extends MongoDbRepository {
-  constructor() {
-    super('users');
-  }
-}
+// export class AuthRepository extends MongoDbRepository {
+//   constructor() {
+//     super('users');
+//   }
+// }

@@ -124,13 +124,17 @@ export class BoardService {
   public async deleteBoard(request: Request, { id }: { id: string }) {
     const board = await this.boardRepository.findById(id);
 
+    if (!board) {
+      throw new NotFoundError('Board not found');
+    }
+
     if (board && board.authorId !== request.user!.id) {
       throw new ForbiddenError('You do not have permission to delete this board');
     }
 
-    await this.boardRepository.delete(id);
+    await this.boardRepository.delete(board.id);
 
-    return null;
+    return this.taskRepository.deleteByQuery({ boardId: board.id });
   }
 }
 

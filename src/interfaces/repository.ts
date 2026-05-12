@@ -8,6 +8,7 @@ export interface IRepository<M extends { id: string; } = any> {
   createMany(data: M[]): Promise<M[]>;
   update(id: string, data: Partial<M>): Promise<M>;
   delete(id: string): Promise<void>;
+  deleteByQuery(query: Partial<M>): Promise<void>;
 }
 
 export interface ITaskRepository extends IRepository<ITask> {
