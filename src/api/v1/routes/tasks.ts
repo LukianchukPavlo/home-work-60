@@ -20,7 +20,6 @@ export const createTaskRouter = (): Router => {
     taskService: service,
   });
 
-  // GET ALL TASKS
   router.get(
     '/',
     [
@@ -32,7 +31,6 @@ export const createTaskRouter = (): Router => {
     controller.getAllTasks.bind(controller)
   );
 
-  // CURSOR
   router.get(
     '/cursor',
     [
@@ -44,19 +42,16 @@ export const createTaskRouter = (): Router => {
     controller.getTasksWithCursor.bind(controller)
   );
 
-  // AGGREGATION
   router.get(
     '/statistics',
     controller.getTasksStatistics.bind(controller)
   );
 
-  // GET TASK BY ID
   router.get(
     '/:taskId',
     controller.getTaskById.bind(controller)
   );
 
-  // CREATE TASK
   router.post(
     '/',
     [
@@ -82,7 +77,6 @@ export const createTaskRouter = (): Router => {
     controller.createTask.bind(controller)
   );
 
-  // UPDATE TASK
   router.put(
     '/:taskId',
     [
@@ -96,8 +90,7 @@ export const createTaskRouter = (): Router => {
     ],
     controller.updateTask.bind(controller)
   );
-
-  // UPDATE WORKFLOW
+  
   router.put(
     '/:taskId/workflow',
     [
@@ -109,7 +102,6 @@ export const createTaskRouter = (): Router => {
     controller.updateTaskWorkflow.bind(controller)
   );
 
-  // DELETE TASK
   router.delete(
     '/:taskId',
     controller.deleteTask.bind(controller)
