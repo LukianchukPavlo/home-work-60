@@ -35,6 +35,8 @@ export const createApp = ({ loggerInstance }: IApp): Application => {
       httpOnly: true,
       secure: process.env.NODE_ENV === 'production',
       sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax', 
+      partitioned: true,
+
   }));
   app.use(loggerMiddleware(loggerInstance));
 
